@@ -19,6 +19,7 @@ void test_parse_register8() {
   assert(parse_register8(&cpu, "h") == &cpu.h);
   assert(parse_register8(&cpu, "l") == &cpu.l);
 
+  assert(parse_register8(&cpu, "f") == NULL);
   assert(parse_register8(&cpu, "gibberish") == NULL);
 }
 
