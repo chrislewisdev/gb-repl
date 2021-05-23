@@ -1,8 +1,8 @@
 #ifndef GBREPL_H
 #define GBREPL_H
 
-typedef unsigned short Word;
-typedef unsigned char Byte;
+typedef unsigned short word;
+typedef unsigned char byte;
 typedef unsigned char Register8;
 typedef unsigned short Register16;
 

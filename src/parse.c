@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "gb-repl.h"
+#include "instructions.h"
 
 Register8* parse_register8(CpuState* cpu, const char* string) {
   if (strcmp(string, "a") == 0) return &cpu->a;
@@ -13,3 +14,17 @@ Register8* parse_register8(CpuState* cpu, const char* string) {
 
   return NULL;
 }
+
+ld8_invocation parse_ld8(CpuState* cpu, const char* destination, const char* source) {
+  Register8* destinationRegister = parse_register8(cpu, destination);
+  if (destinationRegister != NULL) {
+    Register8* sourceRegister = parse_register8(cpu, source);
+    if (sourceRegister != NULL) {
+      return (ld8_invocation){.target = destinationRegister, .value = *sourceRegister};
+    }
+  }
+
+  ld8_invocation blank_invocation;
+  return blank_invocation;
+}
+
