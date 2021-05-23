@@ -4,8 +4,21 @@
 
 #include "gb-repl.h"
 #include "instructions.c"
+#include "parse.c"
 
 #define RUN(TEST) printf(#TEST "..."); TEST(); printf(" passed\n"); 
+
+void test_parse_register() {
+  CpuState cpu;
+
+  assert(parse_register8(&cpu, "a") == &cpu.a);
+  assert(parse_register8(&cpu, "b") == &cpu.b);
+  assert(parse_register8(&cpu, "c") == &cpu.c);
+  assert(parse_register8(&cpu, "d") == &cpu.d);
+  assert(parse_register8(&cpu, "e") == &cpu.e);
+  assert(parse_register8(&cpu, "h") == &cpu.h);
+  assert(parse_register8(&cpu, "l") == &cpu.l);
+}
 
 void test_ld_r_n_command() {
   CpuState cpu;
@@ -37,6 +50,7 @@ void test_add_r_r_command() {
 
 int main() {
   printf("Running tests...\n");
+  RUN(test_parse_register);
   RUN(test_ld_r_n_command);
   RUN(test_add_r_r_command);
   printf("Tests complete.\n");
