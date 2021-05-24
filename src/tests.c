@@ -6,7 +6,20 @@
 #include "instructions.c"
 #include "parse.c"
 
-#define RUN(TEST) printf(#TEST "..."); TEST(); printf(" passed\n"); 
+#define RUN(TEST) printf(#TEST "..."); TEST(); printf(" passed\n");
+
+void test_parse_literal() {
+  assert(parse_literal("0") == 0);
+  assert(parse_literal("50") == 50);
+  assert(parse_literal("123") == 123);
+  assert(parse_literal("255") == 255);
+
+  assert(parse_literal("-1") == -1);
+  assert(parse_literal("-5") == -1);
+  assert(parse_literal("256") == -1);
+  assert(parse_literal("a") == -1);
+  assert(parse_literal("[$0800]") == -1);
+}
 
 void test_parse_register8() {
   CpuState cpu;
@@ -28,9 +41,21 @@ void test_parse_ld8() {
   byte valueToSet = 5;
   cpu.b = valueToSet;
 
+  // Test ld r, r
   ld8_invocation invocation = parse_ld8(&cpu, "a", "b");
+  assert(invocation.error == NULL);
   assert(invocation.target == &cpu.a);
   assert(invocation.value == valueToSet);
+
+  // Test ld r, n
+  invocation = parse_ld8(&cpu, "b", "10");
+  assert(invocation.error == NULL);
+  assert(invocation.target == &cpu.b);
+  assert(invocation.value == 10);
+
+  // Test invalid case
+  invocation = parse_ld8(&cpu, "5", "a");
+  assert(invocation.error != NULL);
 }
 
 void test_ld8_command() {
@@ -55,6 +80,7 @@ void test_ld8_command() {
 int main() {
   printf("Running tests...\n");
   RUN(test_parse_register8);
+  RUN(test_parse_literal);
   RUN(test_parse_ld8);
   RUN(test_ld8_command);
   printf("Tests complete.\n");
