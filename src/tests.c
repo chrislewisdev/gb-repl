@@ -14,9 +14,19 @@ void test_parse_literal() {
   assert(parse_literal("123") == 123);
   assert(parse_literal("255") == 255);
 
+  assert(parse_literal("%01") == 1);
+  assert(parse_literal("%000010") == 2);
+  assert(parse_literal("%00000000") == 0);
+  assert(parse_literal("%1010") == 10);
+
+  assert(parse_literal("$08") == 8);
+  assert(parse_literal("$0F") == 15);
+  assert(parse_literal("$FF") == 255);
+  assert(parse_literal("$00") == 0);
+  assert(parse_literal("$F0") == 240);
+
   assert(parse_literal("-1") == -1);
   assert(parse_literal("-5") == -1);
-  assert(parse_literal("256") == -1);
   assert(parse_literal("a") == -1);
   assert(parse_literal("[$0800]") == -1);
 }

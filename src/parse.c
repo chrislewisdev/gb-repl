@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 
 #include "gb-repl.h"
@@ -15,6 +16,34 @@ Register8* parse_register8(CpuState* cpu, const char* string) {
   return NULL;
 }
 
+bool is_zero(const char* string) {
+  for (int i = 0; i < strlen(string); i++) {
+    if (string[i] != '0') return false;
+  }
+  return true;
+}
+
+int parse_literal(const char* string) {
+  // Work out what base the literal is using
+  int base = 10;
+  if (string[0] == '%') {
+    string = string + 1;
+    base = 2;
+  } else if (string[0] == '$') {
+    string = string + 1;
+    base = 16;
+  }
+
+  // Since strtol returns 0 for non-numbers, make the zero case explicit
+  if (is_zero(string)) return 0;
+
+  int value = strtol(string, NULL, base);
+
+  // Ain't no negative values in gameboy land, boy
+  if (value < 1) return -1;
+  else           return value;
+}
+
 ld8_invocation parse_ld8(CpuState* cpu, const char* destination, const char* source) {
   Register8* destinationRegister = parse_register8(cpu, destination);
   if (destinationRegister != NULL) {
@@ -26,4 +55,3 @@ ld8_invocation parse_ld8(CpuState* cpu, const char* destination, const char* sou
 
   return (ld8_invocation){.error = "Correct ld usage: ld register|mem-address, register|mem-address|literal"};
 }
-
