@@ -63,6 +63,9 @@ void test_parse_ld8() {
   assert(invocation.target == &cpu.b);
   assert(invocation.value == 10);
 
+  invocation = parse_ld8(&cpu, "b", "256");
+  assert(invocation.error != NULL);
+
   // Test invalid case
   invocation = parse_ld8(&cpu, "5", "a");
   assert(invocation.error != NULL);
