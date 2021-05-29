@@ -7,6 +7,8 @@ typedef unsigned char Register8;
 typedef unsigned short Register16;
 
 typedef struct CpuState {
+  byte memory[65536];
+
   Register8 a;
   Register8 f;
   Register8 b;

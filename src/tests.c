@@ -46,6 +46,21 @@ void test_parse_register8() {
   assert(parse_register8(&cpu, "gibberish") == NULL);
 }
 
+void test_parse_memaddress() {
+  CpuState cpu;
+
+  assert(parse_memaddress(&cpu, "[0]") == (byte*)&cpu.memory);
+  assert(parse_memaddress(&cpu, "[65535]") == (byte*)&cpu.memory + 65535);
+  assert(parse_memaddress(&cpu, "[$FF]") == (byte*)&cpu.memory + 255);
+  assert(parse_memaddress(&cpu, "[%1010]") == (byte*)&cpu.memory + 10);
+
+  // TODO: Parse register16
+  //assert(parse_memaddress("[bc|de|hl]"));
+
+  assert(parse_memaddress(&cpu, "[-1]") == NULL);
+  assert(parse_memaddress(&cpu, "[65536]") == NULL);
+}
+
 void test_parse_ld8() {
   CpuState cpu;
   byte valueToSet = 5;
@@ -94,6 +109,7 @@ int main() {
   printf("Running tests...\n");
   RUN(test_parse_register8);
   RUN(test_parse_literal);
+  RUN(test_parse_memaddress);
   RUN(test_parse_ld8);
   RUN(test_ld8_command);
   printf("Tests complete.\n");

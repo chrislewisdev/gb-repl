@@ -45,6 +45,10 @@ int parse_literal(const char* string) {
   else           return value;
 }
 
+byte* parse_memaddress(CpuState* cpu, const char* string) {
+  return NULL;
+}
+
 ld8_invocation parse_ld8(CpuState* cpu, const char* destination, const char* source) {
   Register8* destinationRegister = parse_register8(cpu, destination);
   if (destinationRegister != NULL) {
