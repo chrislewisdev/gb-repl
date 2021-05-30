@@ -118,6 +118,19 @@ void test_parse_ld_r_n() {
   assert(invocation.error != NULL);
 }
 
+void test_parse_ld_r_hl() {
+  CpuState cpu;
+  word memoryAddress = 1234;
+  byte value = 123;
+  cpu.memory[memoryAddress] = value;
+  *((word*)&cpu.l) = memoryAddress;
+
+  ld8_invocation invocation = parse_ld8(&cpu, "a", "[hl]");
+  assert(invocation.error == NULL);
+  assert(invocation.target == &cpu.a);
+  assert(invocation.value == value);
+}
+
 void test_parse_ld_errors() {
   CpuState cpu;
 
@@ -159,6 +172,7 @@ int main() {
   RUN(test_parse_memaddress_register16);
   RUN(test_parse_ld_r_r);
   RUN(test_parse_ld_r_n);
+  RUN(test_parse_ld_r_hl);
   RUN(test_parse_ld_errors);
   RUN(test_ld8_command);
   printf("Tests complete.\n");
