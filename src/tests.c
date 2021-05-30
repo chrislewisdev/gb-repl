@@ -95,28 +95,39 @@ void test_parse_memaddress_register16() {
   assert(parse_memaddress(&cpu, "[bc]") == (byte*)&cpu.memory + 65535);
 }
 
-void test_parse_ld8() {
+void test_parse_ld_r_r() {
   CpuState cpu;
   byte valueToSet = 5;
   cpu.b = valueToSet;
 
-  // Test ld r, r
   ld8_invocation invocation = parse_ld8(&cpu, "a", "b");
   assert(invocation.error == NULL);
   assert(invocation.target == &cpu.a);
   assert(invocation.value == valueToSet);
+}
 
-  // Test ld r, n
-  invocation = parse_ld8(&cpu, "b", "10");
+void test_parse_ld_r_n() {
+  CpuState cpu;
+
+  ld8_invocation invocation = parse_ld8(&cpu, "b", "10");
   assert(invocation.error == NULL);
   assert(invocation.target == &cpu.b);
   assert(invocation.value == 10);
 
   invocation = parse_ld8(&cpu, "b", "256");
   assert(invocation.error != NULL);
+}
 
-  // Test invalid case
-  invocation = parse_ld8(&cpu, "5", "a");
+void test_parse_ld_errors() {
+  CpuState cpu;
+
+  ld8_invocation invocation = parse_ld8(&cpu, "5", "a");
+  assert(invocation.error != NULL);
+
+  invocation = parse_ld8(&cpu, "b", "[de]");
+  assert(invocation.error != NULL);
+
+  invocation = parse_ld8(&cpu, "[de]", "b");
   assert(invocation.error != NULL);
 }
 
@@ -146,7 +157,9 @@ int main() {
   RUN(test_parse_literal);
   RUN(test_parse_memaddress);
   RUN(test_parse_memaddress_register16);
-  RUN(test_parse_ld8);
+  RUN(test_parse_ld_r_r);
+  RUN(test_parse_ld_r_n);
+  RUN(test_parse_ld_errors);
   RUN(test_ld8_command);
   printf("Tests complete.\n");
   return 0;
