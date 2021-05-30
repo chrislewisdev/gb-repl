@@ -59,6 +59,8 @@ void test_parse_memaddress() {
 
   assert(parse_memaddress(&cpu, "[-1]") == NULL);
   assert(parse_memaddress(&cpu, "[65536]") == NULL);
+  assert(parse_memaddress(&cpu, "") == NULL);
+  assert(parse_memaddress(&cpu, "[]") == NULL);
 }
 
 void test_parse_ld8() {

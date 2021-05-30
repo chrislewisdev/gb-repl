@@ -46,17 +46,36 @@ int parse_literal(const char* string) {
 }
 
 byte* parse_memaddress(CpuState* cpu, const char* string) {
-  return NULL;
+  int length = strlen(string);
+
+  // Must always be of the form '[literal]' i.e. minimum length is 3
+  if (length < 3 || string[0] != '[' || string[length-1] != ']') {
+    return NULL;
+  }
+
+  // Pull out the memory index literal to parse
+  char* literal = malloc(length - 2);
+  strncpy(literal, string + 1, length - 2);
+
+  // Is it a valid memory index?
+  int memoryIndex = parse_literal(literal);
+  if (memoryIndex >= 0 && memoryIndex <= USHRT_MAX) {
+    return (byte*)&cpu->memory + memoryIndex;
+  } else {
+    return NULL;
+  }
 }
 
 ld8_invocation parse_ld8(CpuState* cpu, const char* destination, const char* source) {
   Register8* destinationRegister = parse_register8(cpu, destination);
   if (destinationRegister != NULL) {
+    // Check for format: ld r, r
     Register8* sourceRegister = parse_register8(cpu, source);
     if (sourceRegister != NULL) {
       return (ld8_invocation){.target = destinationRegister, .value = *sourceRegister, .error = NULL};
     }
 
+    // Check for format: ld r, n
     int literal = parse_literal(source);
     if (literal >= 0 && literal <= UCHAR_MAX) {
       return (ld8_invocation){.target = destinationRegister, .value = literal, .error = NULL};

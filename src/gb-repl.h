@@ -1,13 +1,15 @@
 #ifndef GBREPL_H
 #define GBREPL_H
 
+#include <limits.h>
+
 typedef unsigned short word;
 typedef unsigned char byte;
 typedef unsigned char Register8;
 typedef unsigned short Register16;
 
 typedef struct CpuState {
-  byte memory[65536];
+  byte memory[USHRT_MAX];
 
   Register8 a;
   Register8 f;
