@@ -17,6 +17,15 @@ Register8* parse_register8(CpuState* cpu, const char* string) {
   return NULL;
 }
 
+Register16* parse_register16(CpuState* cpu, const char* string) {
+  if (strcmp(string, "af") == 0) return (Register16*)&cpu->a;
+  if (strcmp(string, "bc") == 0) return (Register16*)&cpu->b;
+  if (strcmp(string, "de") == 0) return (Register16*)&cpu->d;
+  if (strcmp(string, "hl") == 0) return (Register16*)&cpu->h;
+
+  return NULL;
+}
+
 bool is_zero(const char* string) {
   for (int i = 0; i < strlen(string); i++) {
     if (string[i] != '0') return false;

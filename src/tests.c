@@ -46,6 +46,19 @@ void test_parse_register8() {
   assert(parse_register8(&cpu, "gibberish") == NULL);
 }
 
+void test_parse_register16() {
+  CpuState cpu;
+
+  assert(parse_register16(&cpu, "af") == (word*)&cpu.a);
+  assert(parse_register16(&cpu, "bc") == (word*)&cpu.b);
+  assert(parse_register16(&cpu, "de") == (word*)&cpu.d);
+  assert(parse_register16(&cpu, "hl") == (word*)&cpu.h);
+
+  assert(parse_register16(&cpu, "") == NULL);
+  assert(parse_register16(&cpu, "a") == NULL);
+  assert(parse_register16(&cpu, "gibberish") == NULL);
+}
+
 void test_parse_memaddress() {
   CpuState cpu;
 
@@ -110,6 +123,7 @@ void test_ld8_command() {
 int main() {
   printf("Running tests...\n");
   RUN(test_parse_register8);
+  RUN(test_parse_register16);
   RUN(test_parse_literal);
   RUN(test_parse_memaddress);
   RUN(test_parse_ld8);
