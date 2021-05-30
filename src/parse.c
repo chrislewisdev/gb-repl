@@ -18,10 +18,10 @@ Register8* parse_register8(CpuState* cpu, const char* string) {
 }
 
 Register16* parse_register16(CpuState* cpu, const char* string) {
-  if (strcmp(string, "af") == 0) return (Register16*)&cpu->a;
-  if (strcmp(string, "bc") == 0) return (Register16*)&cpu->b;
-  if (strcmp(string, "de") == 0) return (Register16*)&cpu->d;
-  if (strcmp(string, "hl") == 0) return (Register16*)&cpu->h;
+  if (strcmp(string, "af") == 0) return (Register16*)&cpu->f;
+  if (strcmp(string, "bc") == 0) return (Register16*)&cpu->c;
+  if (strcmp(string, "de") == 0) return (Register16*)&cpu->e;
+  if (strcmp(string, "hl") == 0) return (Register16*)&cpu->l;
 
   return NULL;
 }
@@ -57,17 +57,23 @@ int parse_literal(const char* string) {
 byte* parse_memaddress(CpuState* cpu, const char* string) {
   int length = strlen(string);
 
-  // Must always be of the form '[literal]' i.e. minimum length is 3
+  // Must always be of the form '[literal|register16]' i.e. minimum length is 3
   if (length < 3 || string[0] != '[' || string[length-1] != ']') {
     return NULL;
   }
 
-  // Pull out the memory index literal to parse
-  char* literal = malloc(length - 2);
-  strncpy(literal, string + 1, length - 2);
+  // Pull out the memory address string to parse
+  char* address = malloc(length - 2);
+  strncpy(address, string + 1, length - 2);
+
+  // Is it a register usage?
+  Register16* register16 = parse_register16(cpu, address);
+  if (register16 != NULL) {
+    return (byte*)&cpu->memory + *register16;
+  }
 
   // Is it a valid memory index?
-  int memoryIndex = parse_literal(literal);
+  int memoryIndex = parse_literal(address);
   if (memoryIndex >= 0 && memoryIndex <= USHRT_MAX) {
     return (byte*)&cpu->memory + memoryIndex;
   } else {

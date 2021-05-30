@@ -49,10 +49,10 @@ void test_parse_register8() {
 void test_parse_register16() {
   CpuState cpu;
 
-  assert(parse_register16(&cpu, "af") == (word*)&cpu.a);
-  assert(parse_register16(&cpu, "bc") == (word*)&cpu.b);
-  assert(parse_register16(&cpu, "de") == (word*)&cpu.d);
-  assert(parse_register16(&cpu, "hl") == (word*)&cpu.h);
+  assert(parse_register16(&cpu, "af") == (word*)&cpu.f);
+  assert(parse_register16(&cpu, "bc") == (word*)&cpu.c);
+  assert(parse_register16(&cpu, "de") == (word*)&cpu.e);
+  assert(parse_register16(&cpu, "hl") == (word*)&cpu.l);
 
   assert(parse_register16(&cpu, "") == NULL);
   assert(parse_register16(&cpu, "a") == NULL);
@@ -67,13 +67,32 @@ void test_parse_memaddress() {
   assert(parse_memaddress(&cpu, "[$FF]") == (byte*)&cpu.memory + 255);
   assert(parse_memaddress(&cpu, "[%1010]") == (byte*)&cpu.memory + 10);
 
-  // TODO: Parse register16
-  //assert(parse_memaddress("[bc|de|hl]"));
-
   assert(parse_memaddress(&cpu, "[-1]") == NULL);
   assert(parse_memaddress(&cpu, "[65536]") == NULL);
   assert(parse_memaddress(&cpu, "") == NULL);
   assert(parse_memaddress(&cpu, "[]") == NULL);
+}
+
+void test_parse_memaddress_register16() {
+  CpuState cpu;
+
+  cpu.b = 0;
+  cpu.c = 0;
+  assert(parse_memaddress(&cpu, "[bc]") == (byte*)&cpu.memory);
+
+  cpu.b = 0;
+  cpu.c = 10;
+  assert(parse_memaddress(&cpu, "[bc]") == (byte*)&cpu.memory + 10);
+
+  // bc = $0F00 (3840 in base 10)
+  cpu.b = 15;
+  cpu.c = 0;
+  assert(parse_memaddress(&cpu, "[bc]") == (byte*)&cpu.memory + 3840);
+
+  // bc = $FFFF
+  cpu.b = 255;
+  cpu.c = 255;
+  assert(parse_memaddress(&cpu, "[bc]") == (byte*)&cpu.memory + 65535);
 }
 
 void test_parse_ld8() {
@@ -126,6 +145,7 @@ int main() {
   RUN(test_parse_register16);
   RUN(test_parse_literal);
   RUN(test_parse_memaddress);
+  RUN(test_parse_memaddress_register16);
   RUN(test_parse_ld8);
   RUN(test_ld8_command);
   printf("Tests complete.\n");
