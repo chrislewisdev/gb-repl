@@ -136,6 +136,28 @@ void test_parse_ld_r_hl() {
   }
 }
 
+void test_parse_ld_hl_r() {
+  // Setup hl = 1234, [hl] = 0
+  CpuState cpu;
+  word memoryAddress = 1234;
+  cpu.memory[memoryAddress] = 0;
+  *((word*)&cpu.l) = memoryAddress;
+
+  const char registers[5][2] = {"a", "b", "c", "d", "e"};
+  cpu.a = 1;
+  cpu.b = 1;
+  cpu.c = 1;
+  cpu.d = 1;
+  cpu.e = 1;
+
+  for (int i = 0; i < 5; i++) {
+    ld8_invocation invocation = parse_ld8(&cpu, "[hl]", registers[i]);
+    assert(invocation.error == NULL);
+    assert(invocation.target == &cpu.memory[memoryAddress]);
+    assert(invocation.value == 1);
+  }
+}
+
 void test_parse_ld_errors() {
   CpuState cpu;
 
@@ -147,6 +169,8 @@ void test_parse_ld_errors() {
 
   invocation = parse_ld8(&cpu, "[de]", "b");
   assert(invocation.error != NULL);
+
+  // TODO: Assert that register16 usages and register8 usages can't clash
 }
 
 void test_ld8_command() {
@@ -178,6 +202,7 @@ int main() {
   RUN(test_parse_ld_r_r);
   RUN(test_parse_ld_r_n);
   RUN(test_parse_ld_r_hl);
+  RUN(test_parse_ld_hl_r);
   RUN(test_parse_ld_errors);
   RUN(test_ld8_command);
   printf("Tests complete.\n");

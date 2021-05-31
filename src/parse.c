@@ -114,5 +114,17 @@ ld8_invocation parse_ld8(CpuState* cpu, const char* destination, const char* sou
     }
   }
 
+  byte* destinationMemory = parse_memaddress(cpu, destination);
+  if (destinationMemory != NULL) {
+    // Check format: ld [memaddress], r
+    // Remembering only [hl] can load from all registers and only a can load into all addresses
+    if (is_hl_address(destination) || is_a(source)) {
+      Register8* sourceRegister = parse_register8(cpu, source);
+      if (sourceRegister != NULL) {
+        return (ld8_invocation){.target = destinationMemory, .value = *sourceRegister, .error = NULL};
+      }
+    }
+  }
+
   return (ld8_invocation){.error = "Correct ld usage: ld register|mem-address, register|mem-address|literal8"};
 }
