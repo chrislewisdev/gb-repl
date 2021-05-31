@@ -26,6 +26,14 @@ Register16* parse_register16(CpuState* cpu, const char* string) {
   return NULL;
 }
 
+bool is_a(const char* string) {
+  return strcmp(string, "a") == 0;
+}
+
+bool is_hl_address(const char* string) {
+  return strcmp(string, "[hl]") == 0;
+}
+
 bool is_zero(const char* string) {
   for (int i = 0; i < strlen(string); i++) {
     if (string[i] != '0') return false;
@@ -88,6 +96,15 @@ ld8_invocation parse_ld8(CpuState* cpu, const char* destination, const char* sou
     Register8* sourceRegister = parse_register8(cpu, source);
     if (sourceRegister != NULL) {
       return (ld8_invocation){.target = destinationRegister, .value = *sourceRegister, .error = NULL};
+    }
+
+    // Check for format: ld r, [memaddress]
+    // Remembering only a can load from all memaddresses, and only hl can be used with all registers
+    if (is_a(destination) || is_hl_address(source)) {
+      byte* memoryAddress = parse_memaddress(cpu, source);
+      if (memoryAddress != NULL) {
+       return (ld8_invocation){.target = destinationRegister, .value = *memoryAddress, .error = NULL};
+      }
     }
 
     // Check for format: ld r, n

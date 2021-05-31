@@ -119,16 +119,21 @@ void test_parse_ld_r_n() {
 }
 
 void test_parse_ld_r_hl() {
+  // Setup hl = 1234, [hl] = 123
   CpuState cpu;
   word memoryAddress = 1234;
   byte value = 123;
   cpu.memory[memoryAddress] = value;
   *((word*)&cpu.l) = memoryAddress;
 
-  ld8_invocation invocation = parse_ld8(&cpu, "a", "[hl]");
-  assert(invocation.error == NULL);
-  assert(invocation.target == &cpu.a);
-  assert(invocation.value == value);
+  const char registers[5][2] = {"a", "b", "c", "d", "e"};
+
+  for (int i = 0; i < 5; i++) {
+    ld8_invocation invocation = parse_ld8(&cpu, registers[i], "[hl]");
+    assert(invocation.error == NULL);
+    assert(invocation.target == parse_register8(&cpu, registers[i]));
+    assert(invocation.value == value); 
+  }
 }
 
 void test_parse_ld_errors() {
