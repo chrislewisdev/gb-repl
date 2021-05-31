@@ -124,6 +124,12 @@ ld8_invocation parse_ld8(CpuState* cpu, const char* destination, const char* sou
         return (ld8_invocation){.target = destinationMemory, .value = *sourceRegister, .error = NULL};
       }
     }
+
+    // Check format: ld [hl], n
+    int literal = parse_literal(source);
+    if (is_hl_address(destination) && literal >= 0 && literal <= UCHAR_MAX) {
+      return (ld8_invocation){.target = destinationMemory, .value = literal, .error = NULL};
+    }
   }
 
   return (ld8_invocation){.error = "Correct ld usage: ld register|mem-address, register|mem-address|literal8"};
