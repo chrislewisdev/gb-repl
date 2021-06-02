@@ -7,6 +7,8 @@
 #include "parse.c"
 
 #define RUN(TEST) printf(#TEST "..."); TEST(); printf(" passed\n");
+// TODO: Redefine assert to allow all tests to run despite failures?
+// #define assert(expr) if (!(expr)) { printf("Line %d: '%s' was false", __LINE__, #expr); return; }
 
 void test_parse_literal() {
     assert(parse_literal("0") == 0);
@@ -169,6 +171,31 @@ void test_parse_ld_hl_n() {
     assert(invocation.value == 98);
 }
 
+// TODO: Use this more widely...
+bool check_ld8(ld8_invocation invocation, byte* target, byte value) {
+    return invocation.error == NULL &&
+        invocation.target == target &&
+        invocation.value == value;
+}
+
+void test_parse_ld_memaddress_a() {
+    CpuState cpu;
+    byte valueToSet = 5;
+    word memoryAddress = 1234;
+    cpu.memory[memoryAddress] = valueToSet;
+    *((word*)&cpu.c) = memoryAddress;
+    *((word*)&cpu.e) = memoryAddress;
+
+    assert(check_ld8(parse_ld8(&cpu, "a", "[bc]"), &cpu.a, valueToSet));
+    assert(check_ld8(parse_ld8(&cpu, "a", "[de]"), &cpu.a, valueToSet));
+    assert(check_ld8(parse_ld8(&cpu, "a", "[1234]"), &cpu.a, valueToSet));
+
+    cpu.a = valueToSet;
+    assert(check_ld8(parse_ld8(&cpu, "[bc]", "a"), &cpu.memory[memoryAddress], valueToSet));
+    assert(check_ld8(parse_ld8(&cpu, "[de]", "a"), &cpu.memory[memoryAddress], valueToSet));
+    assert(check_ld8(parse_ld8(&cpu, "[1234]", "a"), &cpu.memory[memoryAddress], valueToSet));
+}
+
 void test_parse_ld_errors() {
     CpuState cpu;
 
@@ -179,6 +206,12 @@ void test_parse_ld_errors() {
     assert(invocation.error != NULL);
 
     invocation = parse_ld8(&cpu, "[de]", "b");
+    assert(invocation.error != NULL);
+
+    invocation = parse_ld8(&cpu, "[150]", "b");
+    assert(invocation.error != NULL);
+
+    invocation = parse_ld8(&cpu, "b", "[150]");
     assert(invocation.error != NULL);
 
     // TODO: Assert that register16 usages and register8 usages can't clash
@@ -215,6 +248,7 @@ int main() {
     RUN(test_parse_ld_r_hl);
     RUN(test_parse_ld_hl_r);
     RUN(test_parse_ld_hl_n);
+    RUN(test_parse_ld_memaddress_a);
     RUN(test_parse_ld_errors);
     RUN(test_ld8_command);
     printf("Tests complete.\n");
