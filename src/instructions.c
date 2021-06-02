@@ -2,6 +2,6 @@
 #include "instructions.h"
 
 void ld8(ld8_invocation invocation) {
-  *invocation.target = invocation.value;
+    *invocation.target = invocation.value;
 }
 
