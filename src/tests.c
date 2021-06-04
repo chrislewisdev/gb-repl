@@ -10,6 +10,16 @@
 // TODO: Redefine assert to allow all tests to run despite failures?
 // #define assert(expr) if (!(expr)) { printf("Line %d: '%s' was false", __LINE__, #expr); return; }
 
+bool check_ld8(ld8_invocation invocation, byte* target, byte value) {
+    return invocation.error == NULL &&
+        invocation.target == target &&
+        invocation.value == value;
+}
+
+bool is_ld8_error(ld8_invocation invocation) {
+    return invocation.error != NULL;
+}
+
 void test_parse_literal() {
     assert(parse_literal("0") == 0);
     assert(parse_literal("50") == 50);
@@ -102,22 +112,15 @@ void test_parse_ld_r_r() {
     byte valueToSet = 5;
     cpu.b = valueToSet;
 
-    ld8_invocation invocation = parse_ld8(&cpu, "a", "b");
-    assert(invocation.error == NULL);
-    assert(invocation.target == &cpu.a);
-    assert(invocation.value == valueToSet);
+    assert(check_ld8(parse_ld8(&cpu, "a", "b"), &cpu.a, valueToSet));
 }
 
 void test_parse_ld_r_n() {
     CpuState cpu;
 
-    ld8_invocation invocation = parse_ld8(&cpu, "b", "10");
-    assert(invocation.error == NULL);
-    assert(invocation.target == &cpu.b);
-    assert(invocation.value == 10);
+    assert(check_ld8(parse_ld8(&cpu, "b", "10"), &cpu.b, 10));
 
-    invocation = parse_ld8(&cpu, "b", "256");
-    assert(invocation.error != NULL);
+    assert(is_ld8_error(parse_ld8(&cpu, "b", "256")));
 }
 
 void test_parse_ld_r_hl() {
@@ -131,10 +134,7 @@ void test_parse_ld_r_hl() {
     const char registers[5][2] = {"a", "b", "c", "d", "e"};
 
     for (int i = 0; i < 5; i++) {
-        ld8_invocation invocation = parse_ld8(&cpu, registers[i], "[hl]");
-        assert(invocation.error == NULL);
-        assert(invocation.target == parse_register8(&cpu, registers[i]));
-        assert(invocation.value == value); 
+        assert(check_ld8(parse_ld8(&cpu, registers[i], "[hl]"), parse_register8(&cpu, registers[i]), value));
     }
 }
 
@@ -153,10 +153,7 @@ void test_parse_ld_hl_r() {
     cpu.e = 1;
 
     for (int i = 0; i < 5; i++) {
-        ld8_invocation invocation = parse_ld8(&cpu, "[hl]", registers[i]);
-        assert(invocation.error == NULL);
-        assert(invocation.target == &cpu.memory[memoryAddress]);
-        assert(invocation.value == 1);
+        assert(check_ld8(parse_ld8(&cpu, "[hl]", registers[i]), &cpu.memory[memoryAddress], 1));
     }
 }
 
@@ -165,17 +162,7 @@ void test_parse_ld_hl_n() {
     word memoryAddress = 1234;
     *((word*)&cpu.l) = memoryAddress;
 
-    ld8_invocation invocation = parse_ld8(&cpu, "[hl]", "98");
-    assert(invocation.error == NULL);
-    assert(invocation.target == &cpu.memory[memoryAddress]);
-    assert(invocation.value == 98);
-}
-
-// TODO: Use this more widely...
-bool check_ld8(ld8_invocation invocation, byte* target, byte value) {
-    return invocation.error == NULL &&
-        invocation.target == target &&
-        invocation.value == value;
+    assert(check_ld8(parse_ld8(&cpu, "[hl]", "98"), &cpu.memory[memoryAddress], 98));
 }
 
 void test_parse_ld_memaddress_a() {
@@ -199,20 +186,11 @@ void test_parse_ld_memaddress_a() {
 void test_parse_ld_errors() {
     CpuState cpu;
 
-    ld8_invocation invocation = parse_ld8(&cpu, "5", "a");
-    assert(invocation.error != NULL);
-
-    invocation = parse_ld8(&cpu, "b", "[de]");
-    assert(invocation.error != NULL);
-
-    invocation = parse_ld8(&cpu, "[de]", "b");
-    assert(invocation.error != NULL);
-
-    invocation = parse_ld8(&cpu, "[150]", "b");
-    assert(invocation.error != NULL);
-
-    invocation = parse_ld8(&cpu, "b", "[150]");
-    assert(invocation.error != NULL);
+    assert(is_ld8_error(parse_ld8(&cpu, "5", "a")));
+    assert(is_ld8_error(parse_ld8(&cpu, "b", "[de]")));
+    assert(is_ld8_error(parse_ld8(&cpu, "[de]", "b")));
+    assert(is_ld8_error(parse_ld8(&cpu, "[150]", "b")));
+    assert(is_ld8_error(parse_ld8(&cpu, "b", "[150]")));
 
     // TODO: Assert that register16 usages and register8 usages can't clash
 }
