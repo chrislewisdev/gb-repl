@@ -7,5 +7,7 @@ typedef struct ld8_invocation {
     const char* error;
 } ld8_invocation;
 
+void ld8(ld8_invocation);
+
 #endif
 

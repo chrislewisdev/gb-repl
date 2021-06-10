@@ -1,3 +1,9 @@
+run: build/gb-repl
+	./build/gb-repl
+
+build/gb-repl: src/main.c src/parse.h src/parse.c src/instructions.h src/instructions.c
+	gcc -o build/gb-repl src/main.c src/parse.c src/instructions.c
+
 test: build/tests
 	./build/tests
 

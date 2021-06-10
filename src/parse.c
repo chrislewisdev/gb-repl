@@ -1,5 +1,6 @@
 #include <limits.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "gb-repl.h"
@@ -133,4 +134,22 @@ ld8_invocation parse_ld8(CpuState* cpu, const char* destination, const char* sou
     }
 
     return (ld8_invocation){.error = "Correct ld usage: ld register|mem-address, register|mem-address|literal8"};
+}
+
+const char* parse_instruction(CpuState* cpu, char* instruction) {
+    const char* operation = strtok(instruction, " ");
+
+    if (strcmp(operation, "ld") == 0) {
+        const char* target = strtok(NULL, " ,");
+        const char* source = strtok(NULL, " ");
+        ld8_invocation invocation = parse_ld8(cpu, target, source);
+
+        if (invocation.error != NULL) return invocation.error;
+
+        ld8(invocation);
+    } else {
+        return "not recognised";
+    }
+
+    return NULL;
 }
