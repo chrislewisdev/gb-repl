@@ -4,16 +4,20 @@ gb-repl is a [REPL environment](https://en.wikipedia.org/wiki/Read%E2%80%93eval%
 
 ## Current Status
 
-gb-repl is in early development: it does not yet have an actual command line interface for you to use, but the interpretation of some basic instructions has been implemented and tested.
+gb-repl is in early development: a basic command-line interface is available, but the interpretation of only some basic instructions has been implemented and tested.
 
 ## Building
 
 The project can be built using `make`: at present I have only tested it in a Linux environment but, provided you have `gcc` and `make` installed, you should be able to build on Windows too.
 
-Since the project only has tests at the moment, you can build and run them all by running:
+To build and run the command-line interface, use:
+
+```
+make run
+```
+
+You can run all tests by running:
 
 ```
 make test
 ```
-
-Once a command-line inteface is available, I will add the instructions for running that too.
